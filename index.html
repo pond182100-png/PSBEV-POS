@@ -226,13 +226,27 @@
     async function submitOrderToBackend(orderPayload) {
       showLoader(true);
       try {
-        await fetch(API_URL, {
+        // 1. We wrap our data in a standard object
+        const requestData = { action: 'createOrder', payload: orderPayload };
+
+        // 2. We use fetch WITHOUT the 'Content-Type: application/json' header
+        const res = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'createOrder', payload: orderPayload })
+          body: JSON.stringify(requestData) 
         });
-      } catch (err) { alert('Network error saving order.'); }
-      showLoader(false);
+    
+      const data = await res.json();
+      if (!data.success) {
+        alert('Backend Error: ' + data.error);
+      } else {
+        alert('Order Confirmed!');
+      }
+    } catch (err) { 
+      console.error(err);
+      alert('Checkout Failed. Check the browser console.'); 
     }
+    showLoader(false);
+  }
 
     async function markOrderComplete(orderId) {
       showLoader(true);
